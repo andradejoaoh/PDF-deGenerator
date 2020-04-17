@@ -17,6 +17,9 @@ class PDFDegenerateViewController: UIViewController {
     @IBOutlet weak var barraDePorcentagem: UISlider!
     @IBOutlet weak var porcentagemLabel: UILabel!
     @IBOutlet weak var switchImagem: UISwitch!
+    @IBOutlet weak var titleView: UIView!
+    @IBOutlet weak var textView: UIView!
+    @IBOutlet weak var settingsView: UIView!
     
     var imagemSelecionada: UIImage?
     
@@ -25,24 +28,15 @@ class PDFDegenerateViewController: UIViewController {
         
         let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareAction))
         self.toolbarItems?.append(shareButton)
-        
-        contatoTextField.layer.borderWidth = 1
-        contatoTextField.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-        contatoTextField.layer.cornerRadius = 4
-        textoTextField.layer.borderWidth = 1
-        textoTextField.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-        textoTextField.layer.cornerRadius = 4
-        
         self.view.addGestureRecognizer(UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:))))
+        setupView()
     }
     
     func degenerarTexto() -> String? {
         let caracteresNoTexto = textoTextField.text.count
         let numeroDeRemocao = barraDePorcentagem.value * Float(caracteresNoTexto)
         var novoTexto = Array(textoTextField.text)
-        
         var indice = caracteresNoTexto
-        
         for _ in 0..<Int(numeroDeRemocao) {
             let removerRandom = Int.random(in: 0..<indice)
             novoTexto.remove(at: removerRandom)
@@ -51,12 +45,23 @@ class PDFDegenerateViewController: UIViewController {
         return String(novoTexto)
     }
     
-    
+    func degenerarContato() -> String? {
+        let caracteresNoContato = contatoTextField.text.count
+        let numeroDeRemocao = barraDePorcentagem.value * Float(caracteresNoContato)
+        var novoContato = Array(contatoTextField.text)
+        var indice = caracteresNoContato
+        for _ in 0..<Int(numeroDeRemocao) {
+            let removerRandom = Int.random(in: 0..<indice)
+            novoContato.remove(at: removerRandom)
+            indice -= 1
+        }
+        return String(novoContato)
+    }
     
     func gerarPDF() -> Data? {
         guard let title = tituloTextField.text,
             let body = degenerarTexto(),
-            let contato = contatoTextField.text,
+            let contato = degenerarContato(),
             let image = imagemSelecionada
             else {
                 let alert = UIAlertController(title: "Não foram fornecidas todas as informações", message: "Você deve preencher todos os campos para poder gerar o PDF.", preferredStyle: .alert)
@@ -151,8 +156,17 @@ class PDFDegenerateViewController: UIViewController {
         performSegue(withIdentifier: "PDFPreviewSegue", sender: self)
     }
     
-    
-    
+    func setupView() -> Swift.Void {
+        contatoTextField.layer.borderWidth = 1
+        contatoTextField.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        contatoTextField.layer.cornerRadius = 4
+        textoTextField.layer.borderWidth = 1
+        textoTextField.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        textoTextField.layer.cornerRadius = 4
+        titleView.layer.cornerRadius = 8
+        textView.layer.cornerRadius = 8
+        settingsView.layer.cornerRadius = 8
+    }
 }
 
 extension PDFDegenerateViewController: UIImagePickerControllerDelegate {
