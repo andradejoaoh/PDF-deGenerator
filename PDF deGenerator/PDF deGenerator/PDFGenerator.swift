@@ -46,13 +46,13 @@ class PDFGenerator {
             let titleBottom = addTitle(pageRect: pageRect)
             let imageBottom = addImage(pageRect: pageRect, imageTop: titleBottom + 18.0)
             if imagem != nil {
-                addBodyText(pageRect: pageRect, textTop: imageBottom + 18.0)
+               let textBottom = addBodyText(pageRect: pageRect, textTop: imageBottom + 18.0)
+                addContactText(pageRect: pageRect, contactTop: textBottom + 16)
             } else {
-                addBodyText(pageRect: pageRect, textTop: titleBottom + 18.0)
+               let textBottom = addBodyText(pageRect: pageRect, textTop: titleBottom + 18.0)
+                addContactText(pageRect: pageRect, contactTop: textBottom + 16)
             }
-            
         }
-        
         return data
     }
     
@@ -82,30 +82,60 @@ class PDFGenerator {
         return titleStringRect.origin.y + titleStringRect.size.height
     }
     
-    func addBodyText(pageRect: CGRect, textTop: CGFloat) {
-        let textFont = UIFont.systemFont(ofSize: 12.0, weight: .regular)
+    func addBodyText(pageRect: CGRect, textTop: CGFloat) -> CGFloat {
         // 1
+        let textFont = UIFont.systemFont(ofSize: 12.0, weight: .regular)
+        // 2
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .natural
         paragraphStyle.lineBreakMode = .byWordWrapping
-        // 2
+        // 3
         let textAttributes = [
             NSAttributedString.Key.paragraphStyle: paragraphStyle,
             NSAttributedString.Key.font: textFont
         ]
+        // 4
         let attributedText = NSAttributedString(
             string: texto,
             attributes: textAttributes
         )
-        // 3
+        // 5
         let textRect = CGRect(
             x: 10,
             y: textTop,
             width: pageRect.width - 20,
-            height: pageRect.height - textTop - pageRect.height / 5.0
+            height: attributedText.size().height * CGFloat(attributedText.string.count)/100
         )
+        // 6
         attributedText.draw(in: textRect)
+        // 7
+        return textRect.origin.y + textRect.size.height
     }
+    
+    func addContactText(pageRect: CGRect, contactTop: CGFloat) {
+           let contactFont = UIFont.systemFont(ofSize: 12.0, weight: .regular)
+           // 1
+           let paragraphStyle = NSMutableParagraphStyle()
+           paragraphStyle.alignment = .natural
+           paragraphStyle.lineBreakMode = .byWordWrapping
+           // 2
+           let contactAttributes = [
+               NSAttributedString.Key.paragraphStyle: paragraphStyle,
+               NSAttributedString.Key.font: contactFont
+           ]
+           let attributedText = NSAttributedString(
+               string: contato,
+               attributes: contactAttributes
+           )
+           // 3
+           let contactRect = CGRect(
+               x: 10,
+               y: contactTop,
+               width: pageRect.width - 20,
+               height: attributedText.size().height * CGFloat(attributedText.string.count)/75
+           )
+           attributedText.draw(in: contactRect)
+       }
     
     func addImage(pageRect: CGRect, imageTop: CGFloat) -> CGFloat {
         guard let imagem = imagem else { return CGFloat(0)}
@@ -114,7 +144,7 @@ class PDFGenerator {
         // 2
         let aspectWidth = maxWidth / imagem.size.width
         let aspectHeight = maxHeight / imagem.size.height
-        let aspectRatio = min(aspectWidth, aspectHeight)
+        let aspectRatio = max(aspectWidth, aspectHeight)
         // 3
         let scaledWidth = imagem.size.width * aspectRatio
         let scaledHeight = imagem.size.height * aspectRatio
